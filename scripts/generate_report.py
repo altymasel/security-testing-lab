@@ -3,6 +3,7 @@ import re
 
 SCAN_FILE = Path("scans/nmap_scan.txt")
 REPORT_FILE = Path("reports/final_report.md")
+ZAP_FILE = Path("reports/zap_report.html")
 
 
 def read_scan():
@@ -50,7 +51,13 @@ def analyze_scan(scan_text):
     return findings, risk_level
 
 
-def build_report(scan_text, findings, risk_level):
+def check_zap_report():
+    if ZAP_FILE.exists():
+        return "ZAP scan report available: reports/zap_report.html"
+    return "ZAP scan not found."
+
+
+def build_report(scan_text, findings, risk_level, zap_summary):
     findings_text = "\n".join(f"- {item}" for item in findings)
 
     return f"""# Security Testing Report
@@ -59,7 +66,7 @@ def build_report(scan_text, findings, risk_level):
 http://localhost:8080
 
 ## Purpose
-This report summarizes the results of an Nmap service discovery scan.
+This report summarizes the results of Nmap service discovery and confirms whether an OWASP ZAP report is available.
 
 ## Raw Scan Output
 {scan_text}
@@ -70,23 +77,28 @@ This report summarizes the results of an Nmap service discovery scan.
 ## Risk Level
 {risk_level}
 
+## ZAP Scan
+{zap_summary}
+
 ## Interpretation
-The scan confirms that port 8080 is open and serving an HTTP application using Apache.
+The scan confirms that port 8080 is open and serving an HTTP application using Apache. This indicates an exposed service that may be vulnerable depending on configuration and version. The ZAP section shows whether a web vulnerability report is also available.
 
 ## Recommendations
 - Review Apache version for known vulnerabilities
 - Limit exposed services
-- Add web vulnerability scanning in the next phase
+- Review the OWASP ZAP HTML report for web security issues
+- Add deeper web vulnerability analysis in the next phase
 """
 
 
 def main():
     scan_text = read_scan()
     findings, risk_level = analyze_scan(scan_text)
+    zap_summary = check_zap_report()
 
     REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
     REPORT_FILE.write_text(
-        build_report(scan_text, findings, risk_level),
+        build_report(scan_text, findings, risk_level, zap_summary),
         encoding="utf-8"
     )
 
