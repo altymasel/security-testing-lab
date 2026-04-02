@@ -14,95 +14,115 @@ def read_scan():
 
 def extract_apache_version(scan_text):
     match = re.search(r"Apache httpd ([0-9.]+)", scan_text)
-    if match:
-        return match.group(1)
-    return None
-
-
-def calculate_risk(scan_text, apache_version):
-    if "8080/tcp open" in scan_text and apache_version:
-        return "Medium"
-    if "8080/tcp open" in scan_text:
-        return "Low"
-    return "Informational"
+    return match.group(1) if match else None
 
 
 def analyze_scan(scan_text):
     findings = []
 
     if "8080/tcp open" in scan_text:
-        findings.append("Port 8080 is open and accessible on localhost.")
+        findings.append("Port 8080 is open.")
 
     if "http" in scan_text.lower():
-        findings.append("An HTTP service was detected on the target.")
+        findings.append("HTTP service detected.")
 
     if "apache" in scan_text.lower():
-        findings.append("Apache web server was identified.")
+        findings.append("Apache server detected.")
 
-    apache_version = extract_apache_version(scan_text)
-    if apache_version:
-        findings.append(f"Apache web server version {apache_version} was detected.")
-        findings.append("Older Apache versions may contain known vulnerabilities if not patched.")
+    version = extract_apache_version(scan_text)
+    if version:
+        findings.append(f"Apache version {version} detected.")
+
+    return findings
+
+
+def calculate_risk(scan_text):
+    if "8080/tcp open" in scan_text:
+        return "Medium"
+    return "Low"
+
+
+def check_zap():
+    return ZAP_FILE.exists()
+
+
+def parse_zap():
+    if not ZAP_FILE.exists():
+        return ["No ZAP findings available."]
+
+    content = ZAP_FILE.read_text(encoding="utf-8", errors="ignore")
+    findings = []
+
+    if "Cookie No HttpOnly Flag" in content:
+        findings.append("Cookies missing HttpOnly flag.")
+
+    if "Content Security Policy (CSP) Header Not Set" in content:
+        findings.append("Missing Content Security Policy header.")
+
+    if "X-Content-Type-Options Header Missing" in content:
+        findings.append("Missing X-Content-Type-Options header.")
+
+    if "Server Leaks Version Information" in content:
+        findings.append("Server version information exposed.")
+
+    if "Missing Anti-clickjacking Header" in content:
+        findings.append("Missing clickjacking protection.")
 
     if not findings:
-        findings.append("No obvious findings were detected from the scan output.")
+        findings.append("No major issues detected.")
 
-    risk_level = calculate_risk(scan_text, apache_version)
-    return findings, risk_level
-
-
-def check_zap_report():
-    if ZAP_FILE.exists():
-        return "ZAP scan report available: reports/zap_report.html"
-    return "ZAP scan not found."
+    return findings
 
 
-def build_report(scan_text, findings, risk_level, zap_summary):
-    findings_text = "\n".join(f"- {item}" for item in findings)
+def build_report(scan, findings, risk, zap_exists, zap_findings):
+    findings_text = "\n".join(f"- {f}" for f in findings)
+    zap_findings_text = "\n".join(f"- {z}" for z in zap_findings)
+
+    zap_status = "Available" if zap_exists else "Not found"
 
     return f"""# Security Testing Report
 
 ## Target
 http://localhost:8080
 
-## Purpose
-This report summarizes the results of Nmap service discovery and confirms whether an OWASP ZAP report is available.
-
-## Raw Scan Output
-{scan_text}
-
-## Findings
+## Findings (Nmap)
 {findings_text}
 
 ## Risk Level
-{risk_level}
+{risk}
 
 ## ZAP Scan
-{zap_summary}
+Status: {zap_status}
 
-## Interpretation
-The scan confirms that port 8080 is open and serving an HTTP application using Apache. This indicates an exposed service that may be vulnerable depending on configuration and version. The ZAP section shows whether a web vulnerability report is also available.
+## ZAP Findings
+{zap_findings_text}
+
+## Summary
+The system exposes an HTTP service on port 8080. ZAP analysis shows several security weaknesses such as missing headers and insecure cookie settings.
 
 ## Recommendations
-- Review Apache version for known vulnerabilities
-- Limit exposed services
-- Review the OWASP ZAP HTML report for web security issues
-- Add deeper web vulnerability analysis in the next phase
+- Review server configuration
+- Add security headers
+- Secure cookies
+- Investigate ZAP findings
 """
 
 
 def main():
-    scan_text = read_scan()
-    findings, risk_level = analyze_scan(scan_text)
-    zap_summary = check_zap_report()
+    scan = read_scan()
+    findings = analyze_scan(scan)
+    risk = calculate_risk(scan)
+
+    zap_exists = check_zap()
+    zap_findings = parse_zap()
 
     REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
     REPORT_FILE.write_text(
-        build_report(scan_text, findings, risk_level, zap_summary),
+        build_report(scan, findings, risk, zap_exists, zap_findings),
         encoding="utf-8"
     )
 
-    print("Report generated at:", REPORT_FILE)
+    print("Report generated:", REPORT_FILE)
 
 
 if __name__ == "__main__":
