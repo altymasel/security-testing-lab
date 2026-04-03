@@ -145,7 +145,7 @@ Recommendations:
         return ai_text if ai_text else fallback + "\n(AI returned no text)"
 
     except Exception:
-        return fallback + "\n(AI fallback used)"
+        return fallback + "\n(AI generated explanation unavailable; fallback summary used)"
 
 
 def build_report(scan_text, nmap_findings, risk_level, zap_exists, zap_findings, ai_summary):
