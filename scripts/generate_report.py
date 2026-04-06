@@ -59,31 +59,32 @@ def calculate_risk(scan_text, zap_findings):
 def check_zap():
     return ZAP_FILE.exists()
 
-
 def parse_zap():
     if not ZAP_FILE.exists():
-        return ["No ZAP findings available."]
+        return {"info": ["No ZAP findings available."], "medium": [], "high": []}
 
     content = ZAP_FILE.read_text(encoding="utf-8", errors="ignore")
-    findings = []
+
+    findings = {
+        "high": [],
+        "medium": [],
+        "info": []
+    }
 
     if "Cookie No HttpOnly Flag" in content:
-        findings.append("Cookies missing HttpOnly flag.")
+        findings["high"].append("Cookies missing HttpOnly flag.")
 
     if "Content Security Policy (CSP) Header Not Set" in content:
-        findings.append("Missing Content Security Policy header.")
+        findings["medium"].append("Missing Content Security Policy header.")
 
     if "X-Content-Type-Options Header Missing" in content:
-        findings.append("Missing X-Content-Type-Options header.")
+        findings["medium"].append("Missing X-Content-Type-Options header.")
 
     if "Server Leaks Version Information" in content:
-        findings.append("Server version information exposed.")
+        findings["info"].append("Server version information exposed.")
 
     if "Missing Anti-clickjacking Header" in content:
-        findings.append("Missing clickjacking protection.")
-
-    if not findings:
-        findings.append("No major ZAP issues detected.")
+        findings["medium"].append("Missing clickjacking protection.")
 
     return findings
 
@@ -150,8 +151,21 @@ Recommendations:
 
 def build_report(scan_text, nmap_findings, risk_level, zap_exists, zap_findings, ai_summary):
     nmap_text = "\n".join(f"- {item}" for item in nmap_findings)
-    zap_text = "\n".join(f"- {item}" for item in zap_findings)
     zap_status = "Available" if zap_exists else "Not found"
+
+    zap_section = ""
+
+    if zap_findings["high"]:
+        zap_section += "### 🔴 High Risk\n"
+        zap_section += "\n".join(f"- {z}" for z in zap_findings["high"]) + "\n\n"
+
+    if zap_findings["medium"]:
+        zap_section += "### 🟡 Medium Risk\n"
+        zap_section += "\n".join(f"- {z}" for z in zap_findings["medium"]) + "\n\n"
+
+    if zap_findings["info"]:
+        zap_section += "### 🔵 Informational\n"
+        zap_section += "\n".join(f"- {z}" for z in zap_findings["info"]) + "\n"
 
     return f"""# Security Testing Report
 
@@ -168,7 +182,7 @@ http://localhost:8080
 Status: {zap_status}
 
 ## ZAP Findings
-{zap_text}
+{zap_section}
 
 ## AI Analysis
 {ai_summary}

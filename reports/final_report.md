@@ -10,17 +10,23 @@ http://localhost:8080
 - Apache version 2.4.25 detected.
 
 ## Risk Level
-High
+Medium
 
 ## ZAP Scan
 Status: Available
 
 ## ZAP Findings
+### 🔴 High Risk
 - Cookies missing HttpOnly flag.
+
+### 🟡 Medium Risk
 - Missing Content Security Policy header.
 - Missing X-Content-Type-Options header.
-- Server version information exposed.
 - Missing clickjacking protection.
+
+### 🔵 Informational
+- Server version information exposed.
+
 
 ## AI Analysis
 Executive Summary:
@@ -36,7 +42,7 @@ Recommendations:
 - Secure cookies with HttpOnly and Secure flags
 - Limit server version disclosure in HTTP responses
 
-(AI fallback used)
+(AI not configured)
 
 ## Raw Scan Output
 # Nmap 7.98 scan initiated Wed Mar 25 13:55:19 2026 as: nmap -sV -p 8080 -oN scans/nmap_scan.txt localhost
