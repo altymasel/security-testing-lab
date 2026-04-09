@@ -6,26 +6,16 @@ http://localhost:8080
 ## Service Discovery (Nmap)
 - Port 8080 is open.
 - HTTP service detected.
-- Apache server detected.
-- Apache version 2.4.25 detected.
 
 ## Risk Level
 Medium
 
 ## ZAP Scan
-Status: Available
+Status: Not found
 
 ## ZAP Findings
-### 🔴 High Risk
-- Cookies missing HttpOnly flag.
-
-### 🟡 Medium Risk
-- Missing Content Security Policy header.
-- Missing X-Content-Type-Options header.
-- Missing clickjacking protection.
-
 ### 🔵 Informational
-- Server version information exposed.
+- No ZAP findings available.
 
 
 ## AI Analysis
@@ -42,19 +32,19 @@ Recommendations:
 - Secure cookies with HttpOnly and Secure flags
 - Limit server version disclosure in HTTP responses
 
-(AI not configured)
+(AI generated explanation unavailable; fallback summary used)
 
 ## Raw Scan Output
-# Nmap 7.98 scan initiated Wed Mar 25 13:55:19 2026 as: nmap -sV -p 8080 -oN scans/nmap_scan.txt localhost
+# Nmap 7.98 scan initiated Wed Apr  8 22:40:04 2026 as: nmap -sV -p 8080 -oN scans/nmap_scan.txt localhost
 Nmap scan report for localhost (127.0.0.1)
-Host is up (0.000037s latency).
+Host is up (0.000039s latency).
 Other addresses for localhost (not scanned): ::1
 
-PORT     STATE SERVICE VERSION
-8080/tcp open  http    Apache httpd 2.4.25 ((Debian))
+PORT     STATE SERVICE    VERSION
+8080/tcp open  tcpwrapped
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Wed Mar 25 13:55:26 2026 -- 1 IP address (1 host up) scanned in 6.30 seconds
+# Nmap done at Wed Apr  8 22:40:04 2026 -- 1 IP address (1 host up) scanned in 0.32 seconds
 
 
 ## Summary

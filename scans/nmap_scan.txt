@@ -1,10 +1,10 @@
-# Nmap 7.98 scan initiated Wed Mar 25 13:55:19 2026 as: nmap -sV -p 8080 -oN scans/nmap_scan.txt localhost
+# Nmap 7.98 scan initiated Wed Apr  8 22:40:04 2026 as: nmap -sV -p 8080 -oN scans/nmap_scan.txt localhost
 Nmap scan report for localhost (127.0.0.1)
-Host is up (0.000037s latency).
+Host is up (0.000039s latency).
 Other addresses for localhost (not scanned): ::1
 
-PORT     STATE SERVICE VERSION
-8080/tcp open  http    Apache httpd 2.4.25 ((Debian))
+PORT     STATE SERVICE    VERSION
+8080/tcp open  tcpwrapped
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Wed Mar 25 13:55:26 2026 -- 1 IP address (1 host up) scanned in 6.30 seconds
+# Nmap done at Wed Apr  8 22:40:04 2026 -- 1 IP address (1 host up) scanned in 0.32 seconds
