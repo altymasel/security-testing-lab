@@ -2,6 +2,11 @@
 
 echo "Starting full security scan..."
 
+if ! docker info >/dev/null 2>&1; then
+  echo "Docker is not running. Please start Docker Desktop and try again."
+  exit 1
+fi
+
 echo ""
 echo "1. Starting DVWA..."
 docker start dvwa >/dev/null 2>&1 || docker run -d -p 8080:80 --name dvwa vulnerables/web-dvwa
@@ -13,6 +18,9 @@ nmap -sV localhost -p 8080 -oN scans/nmap_scan.txt
 
 echo ""
 echo "3. Running ZAP scan..."
+rm -f reports/zap_report.html reports/zap.yaml
+rm -f zap_report.html zap.yaml
+
 docker run -v "$(pwd):/zap/wrk" -t ghcr.io/zaproxy/zaproxy:stable \
   zap-baseline.py \
   -t http://host.docker.internal:8080 \
